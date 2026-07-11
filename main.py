@@ -87,6 +87,7 @@ class SpeakingTracker(voice_recv.AudioSink):
                 self.users[user.id] = user
                 if not was_speaking:
                     self.speaking.add(user.id)
+                    # TODO: Send an event to the websocket server telling it that the user started speaking.
                     print(f"{user} started speaking")
         except Exception as e:
             print(f"write() error for {user}: {e!r}")
@@ -103,6 +104,7 @@ class SpeakingTracker(voice_recv.AudioSink):
                     ]
                     for uid in timed_out:
                         self.speaking.discard(uid)
+                        # TODO: Send an event to the websocket server telling it that the user stopped speaking.
                         print(f"{self.users.get(uid, uid)} stopped speaking")
             except Exception as e:
                 print(f"poll loop error: {e!r}")
@@ -140,12 +142,14 @@ async def on_voice_state_update(member, before, after):
     if after.channel is None and before.channel == bot.voice_client.channel:
         # User left the voice channel
         if not bot.voice_recv.is_speaking(member.id):
+            # TODO: Send an event to the websocket server telling it that the user left the channel
             print(f"{member} stopped speaking (left the channel)")
         else:
             print(f"{member} is still speaking (left the channel)")
 
     elif after.channel == bot.voice_client.channel and before.channel != bot.voice_client.channel:
         # User joined the voice channel
+        # TODO: Send an event to the websocket server telling it that the user joined the channel
         print(f"{member} joined the voice channel")
 
 
